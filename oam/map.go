@@ -43,7 +43,7 @@ func (m *M[K, V]) Get(k K) (V, bool) {
 	return m.data[k], ok
 }
 
-func (m *M[K, V]) Del(k K) {
+func (m *M[K, V]) Delete(k K) {
 	if m.concurrency {
 		m.mx.Lock()
 		defer m.mx.Unlock()

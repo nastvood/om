@@ -30,12 +30,12 @@ func Test_iter_next(t *testing.T) {
 	require.Equal(t, "3", k)
 
 	m.Add("4", 4)
-	m.Del("4")
+	m.Delete("4")
 	m.Add("5", 5)
-	m.Del("5")
+	m.Delete("5")
 	m.Add("6", 6)
 	m.Add("5", 5)
-	m.Del("5")
+	m.Delete("5")
 
 	k, ok = iter.Next()
 	require.True(t, ok)
