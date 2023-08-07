@@ -11,5 +11,10 @@
 ![img_1.png](images/img_1.png)
 
 ## Удаление
-
+### Нет потомков
+![img.png](img.png)
+### Один потомок
+![img_1.png](img_1.png)
+### Два потомка
+![img_2.png](img_2.png)
 https://www.codesdope.com/course/data-structures-red-black-trees-deletion/

@@ -1,28 +1,28 @@
 package conf
 
 type (
-	config struct {
+	Config struct {
 		Capacity    int
 		Concurrency bool
 	}
 
-	Option func(conf *config)
+	Option func(conf *Config)
 )
 
-func DefaultConfig() config {
-	return config{
+func DefaultConfig() Config {
+	return Config{
 		Concurrency: true,
 	}
 }
 
 func WithCapacity(capacity int) Option {
-	return func(conf *config) {
+	return func(conf *Config) {
 		conf.Capacity = capacity
 	}
 }
 
 func WithoutConcurrency() Option {
-	return func(conf *config) {
+	return func(conf *Config) {
 		conf.Concurrency = false
 	}
 }

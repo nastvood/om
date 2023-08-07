@@ -62,3 +62,12 @@ func (m *M[K, V]) Delete(k K) {
 		m.tree = deleteNode(m.tree, k)
 	}
 }
+
+func (m *M[K, V]) Keys() []K {
+	if m.concurrency {
+		m.mx.RLock()
+		defer m.mx.RUnlock()
+	}
+
+	return m.tree.inorder()
+}

@@ -127,6 +127,25 @@ func Test_delete(t *testing.T) {
 		require.Nil(t, tree)
 
 	})
+
+	t.Run("rand", func(t *testing.T) {
+		for _, cnt := range []int{5} { //,50, 100, 150, 200} {
+			t.Run(strconv.Itoa(cnt), func(t *testing.T) {
+				keys, tree := testIntRandSliceToTree(t, cnt)
+				sortedKeys := make([]int, len(keys))
+				copy(sortedKeys, keys)
+				slices.Sort(sortedKeys)
+
+				for _, k := range keys {
+					tree = deleteNode(tree, k)
+					i := slices.Index(sortedKeys, k)
+					sortedKeys = slices.Delete(sortedKeys, i, i+1)
+					t.Log(sortedKeys)
+				}
+
+			})
+		}
+	})
 }
 
 func testIntRandSliceToTree(t *testing.T, n int) ([]int, *node[int]) {

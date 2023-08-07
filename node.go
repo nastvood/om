@@ -1,8 +1,6 @@
 package om
 
 import (
-	"fmt"
-
 	"golang.org/x/exp/constraints"
 )
 
@@ -116,75 +114,81 @@ func find[K constraints.Ordered](root *node[K], k K) *node[K] {
 }
 
 func deleteNode[K constraints.Ordered](root *node[K], k K) *node[K] {
-	n := find(root, k)
-	if n == nil {
+	z := find(root, k)
+	if z == nil {
 		return root
 	}
 
 	// нет потомков
-	if n.right == nil && n.left == nil {
+	if z.right == nil && z.left == nil {
 		// если корень
-		if n.parent == nil {
+		if z.parent == nil {
 			return nil
 		}
 
-		if n == n.parent.left {
-			n.parent.left = nil
+		if z == z.parent.left {
+			z.parent.left = nil
 		} else {
-			n.parent.right = nil
+			z.parent.right = nil
 		}
+
+		z.parent = nil
 
 		return root
 	}
 
-	var x, y *node[K]
+	var x *node[K]
 
-	deletedIsRed := n.isRed
+	deletedIsRed := z.isRed
 
 	// один потомок
 	// то делаем у родителя удаляемой вершины ссылку на этого потомка вместо удаляемой вершины
-	if n.left == nil || n.right == nil {
-		if n.left == nil {
-			x = n.right
-			n.right = nil
+	if z.left == nil || z.right == nil {
+		if z.left == nil {
+			x = z.right
+			z.right = nil
 		} else {
-			x = n.left
-			n.left = nil
+			x = z.left
+			z.left = nil
 		}
 
-		if n == n.parent.left {
-			n.parent.left = x
+		if z == z.parent.left {
+			z.parent.left = x
 		} else {
-			n.parent.right = x
+			z.parent.right = x
 		}
 
-		x.parent = n.parent
+		x.parent = z.parent
 
-		n.parent = nil
+		z.parent = nil
 	} else {
 		// два потомка
 
-		// у - не имеет левого потомка, у - ближайшее (большее) значение к n
-		y = n.right
+		// Y - не имеет левого потомка, Y - ближайшее (большее) значение к z
+		y := z.right
 		for y.left != nil {
 			y = y.left
 		}
 		deletedIsRed = y.isRed
 
 		x = y.right
-		if y.parent == n {
-			// предок у это удаляемая вершина, тогда присоединяем правого потомка y к удаляемой вершине
-			x.parent = n
+		if y.parent == z && x != nil {
+			// предок Y это удаляемая вершина, тогда присоединяем правого потомка Y к удаляемой вершине
+			x.parent = z
 		} else {
-			// заменяем y его правым потомком
-			y.parent.left = x
-			x.parent = y.parent
+			// заменяем Y его правым потомком
+			if y.parent != nil {
+				y.parent.left = x
+			}
+			if x != nil {
+				x.parent = y.parent
+			}
 		}
 
 		y.parent = nil
 		y.right = nil
 
-		n.data = y.data
+		z.data = y.data
 	}
 
 	if !deletedIsRed {
@@ -195,7 +199,66 @@ func deleteNode[K constraints.Ordered](root *node[K], k K) *node[K] {
 }
 
 func deleteFixup[K constraints.Ordered](root *node[K], n *node[K]) *node[K] {
-	fmt.Println(n)
+	if n == nil {
+		return root
+	}
+
+	for n != root && !n.isRed {
+		if n == n.parent.left {
+			w := n.parent.right
+			if w.isRed {
+				w.isRed = false
+				n.parent.isRed = true
+				root = rotateLeft(root, n.parent)
+				w = n.parent.right
+			}
+
+			if !w.left.isRed && !w.right.isRed {
+				w.isRed = true
+				n = n.parent
+			} else {
+				if !w.right.isRed {
+					w.left.isRed = false
+					w.isRed = true
+					root = rotateRight(root, w)
+					w = n.parent.right
+				}
+
+				w.isRed = n.parent.isRed
+				n.parent.isRed = false
+				w.right.isRed = false
+				n = rotateLeft(root, n.parent)
+			}
+		} else {
+			w := n.parent.left
+			if w.isRed {
+				w.isRed = false
+				n.parent.isRed = true
+				root = rotateRight(root, n.parent)
+				w = n.parent.left
+			}
+
+			if !w.left.isRed && !w.right.isRed {
+				w.isRed = true
+				n = n.parent
+			} else {
+				if !w.left.isRed {
+					w.right.isRed = false
+					w.isRed = true
+					root = rotateLeft(root, w)
+					w = n.parent.left
+				}
+
+				w.isRed = n.parent.isRed
+				n.parent.isRed = false
+				w.left.isRed = false
+				n = rotateRight(root, n.parent)
+			}
+		}
+	}
+
+	n.isRed = false
+
 	return root
 }
 

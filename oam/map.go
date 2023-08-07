@@ -6,6 +6,7 @@ import (
 	"github.com/nastvood/om/conf"
 )
 
+// M - map whose keys are sorted in the order of addition.
 type M[K comparable, V any] struct {
 	mx          sync.RWMutex
 	data        map[K]V
