@@ -20,3 +20,20 @@ func (iter *iterator[K, V]) Next() (K, bool) {
 
 	return k, ok
 }
+
+func (iter *iterator[K, V]) Prev() (K, bool) {
+	k, ok, i := iter.m.prev(iter.i - 1)
+	if ok {
+		iter.i = i
+	}
+
+	return k, ok
+}
+
+func (iter *iterator[K, V]) Begin() {
+	iter.i = iter.m.begin()
+}
+
+func (iter *iterator[K, V]) End() {
+	iter.i = iter.m.end()
+}

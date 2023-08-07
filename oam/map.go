@@ -1,6 +1,10 @@
 package oam
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/nastvood/om/conf"
+)
 
 type M[K comparable, V any] struct {
 	mx          sync.RWMutex
@@ -11,13 +15,18 @@ type M[K comparable, V any] struct {
 	concurrency bool
 }
 
-func New[K comparable, V any](capcity int, concurrency bool) *M[K, V] {
+func New[K comparable, V any](opts ...conf.Option) *M[K, V] {
+	c := conf.DefaultConfig()
+	for _, opt := range opts {
+		opt(&c)
+	}
+
 	return &M[K, V]{
-		data:        make(map[K]V, capcity),
-		index:       make(map[K]int, capcity),
-		alive:       make([]bool, 0, capcity),
-		keys:        make([]K, 0, capcity),
-		concurrency: concurrency,
+		data:        make(map[K]V, c.Capacity),
+		index:       make(map[K]int, c.Capacity),
+		alive:       make([]bool, 0, c.Capacity),
+		keys:        make([]K, 0, c.Capacity),
+		concurrency: c.Concurrency,
 	}
 }
 
@@ -27,10 +36,14 @@ func (m *M[K, V]) Add(k K, v V) {
 		defer m.mx.Unlock()
 	}
 
+	_, ok := m.data[k]
+	if !ok {
+		m.alive = append(m.alive, true)
+		m.keys = append(m.keys, k)
+		m.index[k] = len(m.alive) - 1
+	}
+
 	m.data[k] = v
-	m.alive = append(m.alive, true)
-	m.keys = append(m.keys, k)
-	m.index[k] = len(m.alive) - 1
 }
 
 func (m *M[K, V]) Get(k K) (V, bool) {
@@ -91,5 +104,70 @@ func (m *M[K, V]) next(i int) (K, bool, int) {
 		}
 
 		return m.keys[i], true, i
+	}
+}
+
+func (m *M[K, V]) prev(i int) (K, bool, int) {
+	if m.concurrency {
+		m.mx.RLock()
+		defer m.mx.RUnlock()
+	}
+
+	for {
+		if i < 0 || i >= len(m.alive) {
+			var k K
+			return k, false, i
+		}
+
+		if !m.alive[i] {
+			i--
+			continue
+		}
+
+		return m.keys[i], true, i
+	}
+}
+
+func (m *M[K, V]) begin() int {
+	if m.concurrency {
+		m.mx.RLock()
+		defer m.mx.RUnlock()
+	}
+
+	i := 0
+
+	for {
+		if i >= len(m.alive) {
+			return -1
+		}
+
+		if !m.alive[i] {
+			i++
+			continue
+		}
+
+		return i - 1
+	}
+}
+
+func (m *M[K, V]) end() int {
+	if m.concurrency {
+		m.mx.RLock()
+		defer m.mx.RUnlock()
+	}
+
+	i := len(m.alive) - 1
+
+	for {
+		if i <= 0 {
+			return 0
+		}
+
+		if !m.alive[i] {
+			i--
+			continue
+		}
+
+		return i + 1
 	}
 }

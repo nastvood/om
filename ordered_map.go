@@ -3,6 +3,7 @@ package om
 import (
 	"sync"
 
+	"github.com/nastvood/om/conf"
 	"golang.org/x/exp/constraints"
 )
 
@@ -13,10 +14,15 @@ type M[K constraints.Ordered, V any] struct {
 	concurrency bool
 }
 
-func New[K constraints.Ordered, V any](capacity int, concurrency bool) *M[K, V] {
+func New[K constraints.Ordered, V any](opts ...conf.Option) *M[K, V] {
+	c := conf.DefaultConfig()
+	for _, opt := range opts {
+		opt(&c)
+	}
+
 	return &M[K, V]{
-		data:        make(map[K]V, capacity),
-		concurrency: concurrency,
+		data:        make(map[K]V, c.Capacity),
+		concurrency: c.Concurrency,
 	}
 }
 
