@@ -1,6 +1,10 @@
 package om
 
-import "golang.org/x/exp/constraints"
+import (
+	"fmt"
+
+	"golang.org/x/exp/constraints"
+)
 
 type node[K constraints.Ordered] struct {
 	parent, left, right *node[K]
@@ -90,6 +94,108 @@ func insertFixup[K constraints.Ordered](root *node[K], n *node[K]) *node[K] {
 
 	root.isRed = false
 
+	return root
+}
+
+func find[K constraints.Ordered](root *node[K], k K) *node[K] {
+	current := root
+	for current != nil {
+		if current.data == k {
+			return current
+		}
+
+		if current.data > k {
+			current = current.left
+			continue
+		}
+
+		current = current.right
+	}
+
+	return nil
+}
+
+func deleteNode[K constraints.Ordered](root *node[K], k K) *node[K] {
+	n := find(root, k)
+	if n == nil {
+		return root
+	}
+
+	// нет потомков
+	if n.right == nil && n.left == nil {
+		// если корень
+		if n.parent == nil {
+			return nil
+		}
+
+		if n == n.parent.left {
+			n.parent.left = nil
+		} else {
+			n.parent.right = nil
+		}
+
+		return root
+	}
+
+	var x, y *node[K]
+
+	deletedIsRed := n.isRed
+
+	// один потомок
+	// то делаем у родителя удаляемой вершины ссылку на этого потомка вместо удаляемой вершины
+	if n.left == nil || n.right == nil {
+		if n.left == nil {
+			x = n.right
+			n.right = nil
+		} else {
+			x = n.left
+			n.left = nil
+		}
+
+		if n == n.parent.left {
+			n.parent.left = x
+		} else {
+			n.parent.right = x
+		}
+
+		x.parent = n.parent
+
+		n.parent = nil
+	} else {
+		// два потомка
+
+		// у - не имеет левого потомка, у - ближайшее (большее) значение к n
+		y = n.right
+		for y.left != nil {
+			y = y.left
+		}
+		deletedIsRed = y.isRed
+
+		x = y.right
+		if y.parent == n {
+			// предок у это удаляемая вершина, тогда присоединяем правого потомка y к удаляемой вершине
+			x.parent = n
+		} else {
+			// заменяем y его правым потомком
+			y.parent.left = x
+			x.parent = y.parent
+		}
+
+		y.parent = nil
+		y.right = nil
+
+		n.data = y.data
+	}
+
+	if !deletedIsRed {
+		return deleteFixup(root, x)
+	}
+
+	return root
+}
+
+func deleteFixup[K constraints.Ordered](root *node[K], n *node[K]) *node[K] {
+	fmt.Println(n)
 	return root
 }
 

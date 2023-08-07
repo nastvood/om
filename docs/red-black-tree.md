@@ -9,3 +9,7 @@
 ## Повороты
 ### Левый поворот
 ![img_1.png](images/img_1.png)
+
+## Удаление
+
+https://www.codesdope.com/course/data-structures-red-black-trees-deletion/

@@ -68,6 +68,7 @@ func (m *M[K, V]) Len() int {
 	return len(m.data)
 }
 
+//nolint:revive
 func (m *M[K, V]) Iterator() *iterator[K, V] {
 	return newIterator[K, V](m)
 }

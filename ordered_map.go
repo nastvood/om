@@ -33,3 +33,26 @@ func (m *M[K, V]) Add(k K, v V) {
 
 	m.data[k] = v
 }
+
+func (m *M[K, V]) Get(k K) (V, bool) {
+	if m.concurrency {
+		m.mx.RLock()
+		defer m.mx.RUnlock()
+	}
+
+	v, ok := m.data[k]
+
+	return v, ok
+}
+
+func (m *M[K, V]) Delete(k K) {
+	if m.concurrency {
+		m.mx.Lock()
+		defer m.mx.Unlock()
+	}
+
+	_, ok := m.data[k]
+	if ok {
+		m.tree = deleteNode(m.tree, k)
+	}
+}
