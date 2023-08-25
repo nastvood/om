@@ -10,7 +10,7 @@ import (
 type M[K constraints.Ordered, V any] struct {
 	mx          sync.RWMutex
 	data        map[K]V
-	tree        *node[K]
+	tree        *tree[K]
 	concurrency bool
 }
 
@@ -22,6 +22,7 @@ func New[K constraints.Ordered, V any](opts ...conf.Option) *M[K, V] {
 
 	return &M[K, V]{
 		data:        make(map[K]V, c.Capacity),
+		tree:        newTree[K](c.Capacity),
 		concurrency: c.Concurrency,
 	}
 }
@@ -34,7 +35,7 @@ func (m *M[K, V]) Add(k K, v V) {
 
 	_, ok := m.data[k]
 	if !ok {
-		m.tree = insert(m.tree, k)
+		m.tree.insert(k)
 	}
 
 	m.data[k] = v
@@ -59,7 +60,7 @@ func (m *M[K, V]) Delete(k K) {
 
 	_, ok := m.data[k]
 	if ok {
-		m.tree = deleteNode(m.tree, k)
+		m.tree.delete(k)
 	}
 }
 
