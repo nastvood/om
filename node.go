@@ -4,12 +4,19 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
-type node[K constraints.Ordered] struct {
-	parent, left, right *node[K]
-	data                K
-	isRed               bool
-	isDel               bool
-}
+type (
+	node[K constraints.Ordered] struct {
+		parent, left, right *node[K]
+		data                K
+		pos                 bucketPos
+		isRed               bool
+		isDel               bool
+	}
+
+	bucketPos struct {
+		row, col int
+	}
+)
 
 func insert[K constraints.Ordered](root *node[K], n *node[K]) *node[K] {
 	current := root

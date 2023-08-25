@@ -22,7 +22,7 @@ func New[K constraints.Ordered, V any](opts ...conf.Option) *M[K, V] {
 
 	return &M[K, V]{
 		data:        make(map[K]V, c.Capacity),
-		tree:        newTree[K](c.Capacity),
+		tree:        newTree[K](),
 		concurrency: c.Concurrency,
 	}
 }

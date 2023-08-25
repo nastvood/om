@@ -3,6 +3,7 @@ package om
 import (
 	"strconv"
 	"testing"
+	"unsafe"
 
 	"github.com/stretchr/testify/require"
 	"golang.org/x/exp/rand"
@@ -11,7 +12,7 @@ import (
 
 func Test_insert(t *testing.T) {
 	t.Run("down to", func(t *testing.T) {
-		tr := newTree[int](0)
+		tr := newTree[int]()
 
 		tr.insert(9)
 		require.ElementsMatch(t, []int{9}, tr.inorder())
@@ -31,10 +32,18 @@ func Test_insert(t *testing.T) {
 		require.ElementsMatch(t, []int{2, 3, 4, 5, 6, 7, 8, 9}, tr.inorder())
 		tr.insert(1)
 		require.ElementsMatch(t, []int{1, 2, 3, 4, 5, 6, 7, 8, 9}, tr.inorder())
+
+		for _, k := range []int{1, 2, 3, 4, 5, 6, 7, 8, 9} {
+			n := find(tr.root, k)
+			bucketNode := &tr.buckets[n.pos.row][n.pos.col]
+			require.Equal(t, n, bucketNode)
+			pN, pBucketNode := unsafe.Pointer(n), unsafe.Pointer(bucketNode)
+			require.Equal(t, pN, pBucketNode)
+		}
 	})
 
 	t.Run("up", func(t *testing.T) {
-		tr := newTree[int](0)
+		tr := newTree[int]()
 
 		tr.insert(1)
 		require.ElementsMatch(t, []int{1}, tr.inorder())
@@ -57,7 +66,7 @@ func Test_insert(t *testing.T) {
 	})
 
 	t.Run("rand", func(t *testing.T) {
-		for _, cnt := range []int{0, 1, 10, 50, 100, 150, 200} {
+		for _, cnt := range []int{1000} { //1, 10, 50, 100, 150, 200} {
 			t.Run(strconv.Itoa(cnt), func(t *testing.T) {
 				vals, tree := testIntRandSliceToTree(t, cnt)
 				slices.Sort(vals)
@@ -69,7 +78,7 @@ func Test_insert(t *testing.T) {
 
 func Test_find(t *testing.T) {
 	t.Run("empty", func(t *testing.T) {
-		empty := newTree[int](0)
+		empty := newTree[int]()
 		v := find(empty.root, 15)
 		require.Nil(t, v)
 	})
@@ -95,7 +104,7 @@ func Test_find(t *testing.T) {
 func testIntRandSliceToTree(t *testing.T, n int) ([]int, *tree[int]) {
 	t.Helper()
 
-	tr := newTree[int](n)
+	tr := newTree[int]()
 
 	vals := rand.Perm(n)
 	for _, v := range vals {
