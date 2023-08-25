@@ -12,7 +12,7 @@ import (
 
 func Test_insert(t *testing.T) {
 	t.Run("down to", func(t *testing.T) {
-		tr := newTree[int]()
+		tr := newTree[int](0)
 
 		tr.insert(9)
 		require.ElementsMatch(t, []int{9}, tr.inorder())
@@ -43,7 +43,7 @@ func Test_insert(t *testing.T) {
 	})
 
 	t.Run("up", func(t *testing.T) {
-		tr := newTree[int]()
+		tr := newTree[int](0)
 
 		tr.insert(1)
 		require.ElementsMatch(t, []int{1}, tr.inorder())
@@ -66,7 +66,7 @@ func Test_insert(t *testing.T) {
 	})
 
 	t.Run("rand", func(t *testing.T) {
-		for _, cnt := range []int{1000} { //1, 10, 50, 100, 150, 200} {
+		for _, cnt := range []int{1, 10, 50, 100, 150, 200, 500} {
 			t.Run(strconv.Itoa(cnt), func(t *testing.T) {
 				vals, tree := testIntRandSliceToTree(t, cnt)
 				slices.Sort(vals)
@@ -78,7 +78,7 @@ func Test_insert(t *testing.T) {
 
 func Test_find(t *testing.T) {
 	t.Run("empty", func(t *testing.T) {
-		empty := newTree[int]()
+		empty := newTree[int](0)
 		v := find(empty.root, 15)
 		require.Nil(t, v)
 	})
@@ -104,7 +104,7 @@ func Test_find(t *testing.T) {
 func testIntRandSliceToTree(t *testing.T, n int) ([]int, *tree[int]) {
 	t.Helper()
 
-	tr := newTree[int]()
+	tr := newTree[int](0)
 
 	vals := rand.Perm(n)
 	for _, v := range vals {

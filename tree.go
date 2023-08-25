@@ -8,15 +8,21 @@ type tree[K constraints.Ordered] struct {
 	root      *node[K]
 	buckets   [][]node[K]
 	deleted   map[K]bucketPos
+	bucketLen int
 	curBucket int
 }
 
-const bucketLen = 100
+const defaultBucketLen = 100
 
-func newTree[K constraints.Ordered]() *tree[K] {
+func newTree[K constraints.Ordered](bucketLen int) *tree[K] {
+	if bucketLen < defaultBucketLen {
+		bucketLen = defaultBucketLen
+	}
+
 	return &tree[K]{
-		buckets: [][]node[K]{make([]node[K], 0, bucketLen)},
-		deleted: make(map[K]bucketPos),
+		buckets:   [][]node[K]{make([]node[K], 0, bucketLen)},
+		deleted:   make(map[K]bucketPos),
+		bucketLen: bucketLen,
 	}
 }
 
@@ -33,8 +39,8 @@ func (t *tree[K]) insert(k K) {
 		return
 	}
 
-	if len(t.buckets[t.curBucket]) == bucketLen {
-		t.buckets = append(t.buckets, make([]node[K], 0, bucketLen))
+	if len(t.buckets[t.curBucket]) == t.bucketLen {
+		t.buckets = append(t.buckets, make([]node[K], 0, t.bucketLen))
 		t.curBucket++
 	}
 
