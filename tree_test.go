@@ -101,6 +101,48 @@ func Test_find(t *testing.T) {
 	})
 }
 
+func Test_inorder_nonrec(t *testing.T) {
+	t.Run("empty", func(t *testing.T) {
+		empty := newTree[int](0)
+		keys := empty.root.inorder(0)
+		require.Equal(t, ([]int)(nil), keys)
+	})
+
+	t.Run("one", func(t *testing.T) {
+		tr := newTree[int](0)
+		tr.insert(1)
+		keys := tr.root.inorder(1)
+		require.Equal(t, []int{1}, keys)
+	})
+
+	t.Run("two", func(t *testing.T) {
+		tr := newTree[int](0)
+		tr.insert(2)
+		tr.insert(1)
+		keys := tr.root.inorder(1)
+		require.Equal(t, []int{1, 2}, keys)
+	})
+
+	t.Run("three", func(t *testing.T) {
+		tr := newTree[int](0)
+		tr.insert(2)
+		tr.insert(1)
+		tr.insert(7)
+		keys := tr.root.inorder(1)
+		require.Equal(t, []int{1, 2, 7}, keys)
+	})
+
+	for _, cnt := range []int{5, 10, 25, 55, 100} {
+		t.Run(strconv.Itoa(cnt), func(t *testing.T) {
+			expKeys, tr := testIntRandSliceToTree(t, cnt)
+			keys := tr.root.inorder(cnt)
+			slices.Sort(expKeys)
+			require.Equal(t, expKeys, keys)
+		})
+	}
+
+}
+
 func testIntRandSliceToTree(t *testing.T, n int) ([]int, *tree[int]) {
 	t.Helper()
 

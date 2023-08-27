@@ -187,10 +187,42 @@ func fetch[K constraints.Ordered](data []K, x *node[K]) []K {
 	return data
 }
 
-func (x *node[K]) inorder() []K {
+func (x *node[K]) inorderRec() []K {
 	if x == nil {
 		return nil
 	}
 
 	return fetch(make([]K, 0), x)
+}
+
+func (x *node[K]) inorder(capacity int) []K {
+	if x == nil {
+		return nil
+	}
+
+	keys := make([]K, 0, capacity)
+
+	st := make([]*node[K], 0, capacity)
+	current := x
+	for {
+		if current == nil && len(st) == 0 {
+			break
+		}
+
+		for {
+			if current == nil {
+				break
+			}
+
+			st = append(st, current)
+			current = current.left
+		}
+
+		keys = append(keys, st[len(st)-1].data)
+		current = st[len(st)-1]
+		st = st[:len(st)-1]
+		current = current.right
+	}
+
+	return keys
 }

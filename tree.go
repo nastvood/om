@@ -64,5 +64,5 @@ func (t *tree[K]) delete(k K) {
 }
 
 func (t *tree[K]) inorder() []K {
-	return t.root.inorder()
+	return t.root.inorderRec()
 }
