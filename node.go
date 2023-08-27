@@ -195,6 +195,50 @@ func (x *node[K]) inorderRec() []K {
 	return fetch(make([]K, 0), x)
 }
 
+func (x *node[K]) iterator(capacity int) func() *K {
+	if x == nil {
+		return func() *K {
+			return nil
+		}
+	}
+
+	st := make([]*node[K], 0, capacity)
+	current := x
+
+	return func() *K {
+		for {
+			if current == nil && len(st) == 0 {
+				break
+			}
+
+			for {
+				if current == nil {
+					break
+				}
+
+				st = append(st, current)
+				current = current.left
+			}
+
+			var key *K
+			if !st[len(st)-1].isDel {
+				data := st[len(st)-1].data
+				key = &data
+			}
+
+			current = st[len(st)-1]
+			st = st[:len(st)-1]
+			current = current.right
+
+			if key != nil {
+				return key
+			}
+		}
+
+		return nil
+	}
+}
+
 func (x *node[K]) inorder(capacity int) []K {
 	if x == nil {
 		return nil

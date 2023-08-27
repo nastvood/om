@@ -140,7 +140,23 @@ func Test_inorder_nonrec(t *testing.T) {
 			require.Equal(t, expKeys, keys)
 		})
 	}
+}
 
+func Test_iterator(t *testing.T) {
+	for _, cnt := range []int{0, 5, 10, 25, 55, 100} {
+		t.Run(strconv.Itoa(cnt), func(t *testing.T) {
+			expKeys, tr := testIntRandSliceToTree(t, cnt)
+			slices.Sort(expKeys)
+
+			keys := make([]int, 0, len(expKeys))
+			next := tr.root.iterator(100)
+			for key := next(); key != nil; key = next() {
+				keys = append(keys, *key)
+			}
+
+			require.Equal(t, expKeys, keys)
+		})
+	}
 }
 
 func testIntRandSliceToTree(t *testing.T, n int) ([]int, *tree[int]) {
