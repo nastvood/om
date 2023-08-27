@@ -218,7 +218,9 @@ func (x *node[K]) inorder(capacity int) []K {
 			current = current.left
 		}
 
-		keys = append(keys, st[len(st)-1].data)
+		if !st[len(st)-1].isDel {
+			keys = append(keys, st[len(st)-1].data)
+		}
 		current = st[len(st)-1]
 		st = st[:len(st)-1]
 		current = current.right
